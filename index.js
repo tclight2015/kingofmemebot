@@ -1,10 +1,11 @@
-const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// 這裡用環境變數（安全！）
-const token = process.env.BOT_TOKEN;
+app.get('/', (req, res) => {
+  res.send('King of Meme Bot is running!');
+});
 
-const bot = new TelegramBot(token, { polling: true });
-
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, "👑 Welcome to The King of Meme Official Group! Stay tuned for announcements and fun memes.");
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
