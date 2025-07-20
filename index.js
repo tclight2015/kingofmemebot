@@ -1,27 +1,26 @@
 const express = require('express');
 const { Telegraf } = require('telegraf');
 
-const BOT_TOKEN = '你的真實 Bot Token';
-const bot = new Telegraf(BOT_TOKEN);
 const app = express();
+const PORT = process.env.PORT || 10000;
 
+// 替換為你的真實 Token！
+const bot = new Telegraf('7524117562:AAHUW-QLrXkaXeIEkw-L5zxmiDc70V-Fn1o');
+
+// 基本指令處理
 bot.start((ctx) => ctx.reply('你好！我是 King of Meme Bot 🤖'));
-bot.hears(/meme/i, async (ctx) => {
-  await ctx.reply('這裡給你一張迷因圖片 😎');
-});
+bot.hears('Meme', (ctx) => ctx.reply('🚀 King of Meme，敬請期待！'));
 
-app.use(bot.webhookCallback('/secret-path')); // 你可以自訂 webhook 路徑
+// Webhook 設定
+app.use(bot.webhookCallback('/secret-path'));
+
+// 這裡設置 webhook 到 Render 自己的 URL
+bot.telegram.setWebhook('https://kingofmemebot.onrender.com/secret-path');
 
 app.get('/', (req, res) => {
-  res.send('King of Meme Bot is running with Webhook!');
+  res.send('King of Meme Bot Webhook Server is running!');
 });
 
-app.listen(10000, async () => {
-  console.log('Server running on port 10000');
-
-  // 這裡要設定 Webhook URL
-  const webhookUrl = 'https://你的-render-service-url.onrender.com/secret-path';
-  await bot.telegram.setWebhook(webhookUrl);
-
-  console.log(`Webhook set to ${webhookUrl}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
 });

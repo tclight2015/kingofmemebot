@@ -1,7 +1,7 @@
 {
   "name": "kingofmemebot",
   "version": "1.0.0",
-  "description": "Telegram bot for King of Meme (Webhook version)",
+  "description": "Telegram bot for King of Meme",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
