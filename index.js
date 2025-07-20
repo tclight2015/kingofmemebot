@@ -1,39 +1,41 @@
-const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
+const { Telegraf } = require('telegraf');
 
-const token = '7524117562:AAHUW-QLrXkaXeIEkw-L5zxmiDc70V-Fn1o';
-const bot = new TelegramBot(token, { polling: true });
-
-// Express server (Render 用)
 const app = express();
-const port = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000;
 
+// 替換成你的 Telegram Bot Token
+const bot = new Telegraf('7524117562:AAHUW-QLrXkaXeIEkw-L5zxmiDc70V-Fn1o');
+
+// 固定 Meme 圖片庫
+const memeImages = [
+  'https://i.imgur.com/1.jpg',
+  'https://i.imgur.com/2.jpg',
+  'https://i.imgur.com/3.jpg',
+  'https://i.imgur.com/4.jpg',
+  'https://i.imgur.com/5.jpg',
+  'https://i.imgur.com/6.jpg',
+  'https://i.imgur.com/7.jpg',
+  'https://i.imgur.com/8.jpg',
+  'https://i.imgur.com/9.jpg',
+  'https://i.imgur.com/10.jpg'
+];
+
+// Bot 回覆 /start
+bot.start((ctx) => ctx.reply('你好！我是 King of Meme Bot 🤖'));
+
+bot.hears('Meme', (ctx) => {
+  const meme = memeImages[Math.floor(Math.random() * memeImages.length)];
+  ctx.replyWithPhoto(meme);
+});
+
+// Express Server
 app.get('/', (req, res) => {
   res.send('King of Meme Bot is running!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
 
-// /start 指令
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, '你好！我是 King of Meme Bot 🤖');
-});
-
-// 文字訊息 "Meme"
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text.toLowerCase();
-
-  if (text === 'meme') {
-    // 這裡用現成的 meme URL，你可以改成你自己的 meme 圖片庫
-    const memeUrls = [
-      'https://i.imgur.com/8fFM4Rk.jpeg',
-      'https://i.imgur.com/YOe2cUg.jpeg',
-      'https://i.imgur.com/w3duR07.png'
-    ];
-    const randomMeme = memeUrls[Math.floor(Math.random() * memeUrls.length)];
-    bot.sendPhoto(chatId, randomMeme);
-  }
-});
+bot.launch();
