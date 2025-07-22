@@ -6,7 +6,11 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const app = express();
 
 // 處理 /start 指令
-bot.start((ctx) => ctx.reply('你好！我是 King of Meme Bot 🤖'));
+bot.start((ctx) => {
+  console.log('💡 chat.id:', ctx.chat.id);
+  ctx.reply('你好！我是 King of Meme Bot 🤖');
+});
+'));
 
 // 處理 Meme 指令，隨機回傳一張 meme 圖片
 bot.command('Meme', async (ctx) => {
