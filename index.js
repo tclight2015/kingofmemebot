@@ -1,24 +1,27 @@
 const { Telegraf } = require('telegraf');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
-// 目標發送群組 ID
 const TARGET_CHAT_ID = '-1002738464953';
 
-// 預設 meme 圖 URL pool
-const memeImages = [
-  'https://i.imgflip.com/30b1gx.jpg', // "Drake meme"
-  'https://i.imgflip.com/1ur9b0.jpg', // "Distracted boyfriend"
-  'https://i.imgflip.com/4/1bij.jpg', // "One does not simply"
-  'https://i.imgflip.com/26am.jpg',   // "Grumpy cat"
-  'https://i.imgflip.com/3si4.jpg'    // "Ancient aliens"
-];
+// 讀取 assets 資料夾，找出最新檔案
+function getLatestImage() {
+  const assetsDir = path.join(__dirname, 'assets');
+  const files = fs.readdirSync(assetsDir)
+    .filter(file => /\.(jpg|jpeg|png)$/i.test(file))
+    .map(file => ({
+      name: file,
+      time: fs.statSync(path.join(assetsDir, file)).mtime.getTime()
+    }))
+    .sort((a, b) => b.time - a.time);
 
-// 隨機挑選一張圖片
-function getRandomMeme() {
-  const index = Math.floor(Math.random() * memeImages.length);
-  return memeImages[index];
+  if (files.length > 0) {
+    return path.join(assetsDir, files[0].name);
+  } else {
+    return null;
+  }
 }
 
 // /start 指令
@@ -26,17 +29,26 @@ bot.start((ctx) => {
   ctx.reply('你好！我是 King of Meme Bot 🤖');
 });
 
-// 自動發送 meme（Render cronjob 用）
+// 自動發送 meme（執行時立即）
 async function sendMeme() {
   try {
-    const meme = getRandomMeme();
-    await bot.telegram.sendPhoto(TARGET_CHAT_ID, meme, {
-      caption: '🤣 King of Meme Daily Meme!'
-    });
-    console.log(`✅ Meme sent to Telegram group: ${TARGET_CHAT_ID}`);
+    const latestImage = getLatestImage();
+    if (latestImage) {
+      await bot.telegram.sendPhoto(TARGET_CHAT_ID, { source: latestImage }, {
+        caption: '🤣 King of Meme Daily Meme!'
+      });
+      console.log(`✅ 已發送最新 meme 圖片：${latestImage}`);
+    } else {
+      console.log('⚠️ assets 資料夾內沒有圖片可發送');
+    }
   } catch (err) {
-    console.error('❌ Failed to send meme:', err);
+    console.error('❌ 發送 meme 發生錯誤:', err);
   }
 }
 
-sendMeme(); // 立即執行一次
+sendMeme();  // 啟動時自動執行一次
+
+// 啟動 bot（僅需要用於 /start 回覆）
+bot.launch();
+
+console.log('✅ Telegram bot ready（自動同步 assets）');
