@@ -1,39 +1,42 @@
 const { Telegraf } = require('telegraf');
-const axios = require('axios');
+require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const TARGET_CHAT_ID = -1002738464953; // 你的群組 ID
 
-// 啟動 log
-bot.launch().then(() => {
-  console.log('✅ Telegram bot 已啟動');
-  sendMeme(); // 啟動時自動發一張 meme
-});
+// 目標發送群組 ID
+const TARGET_CHAT_ID = '-1002738464953';
+
+// 預設 meme 圖 URL pool
+const memeImages = [
+  'https://i.imgflip.com/30b1gx.jpg', // "Drake meme"
+  'https://i.imgflip.com/1ur9b0.jpg', // "Distracted boyfriend"
+  'https://i.imgflip.com/4/1bij.jpg', // "One does not simply"
+  'https://i.imgflip.com/26am.jpg',   // "Grumpy cat"
+  'https://i.imgflip.com/3si4.jpg'    // "Ancient aliens"
+];
+
+// 隨機挑選一張圖片
+function getRandomMeme() {
+  const index = Math.floor(Math.random() * memeImages.length);
+  return memeImages[index];
+}
 
 // /start 指令
 bot.start((ctx) => {
   ctx.reply('你好！我是 King of Meme Bot 🤖');
-  console.log(`💡 chat.id: ${ctx.chat.id}`);
 });
 
-// 發送 meme 圖片
+// 自動發送 meme（Render cronjob 用）
 async function sendMeme() {
   try {
-    const response = await axios.get('https://api.imgflip.com/get_memes');
-    if (response.data.success) {
-      const memes = response.data.data.memes;
-      const randomMeme = memes[Math.floor(Math.random() * memes.length)];
-      await bot.telegram.sendPhoto(TARGET_CHAT_ID, randomMeme.url);
-      console.log('✅ 自動 meme 已發送');
-    } else {
-      console.log('⚠️ 取圖失敗');
-    }
+    const meme = getRandomMeme();
+    await bot.telegram.sendPhoto(TARGET_CHAT_ID, meme, {
+      caption: '🤣 King of Meme Daily Meme!'
+    });
+    console.log(`✅ Meme sent to Telegram group: ${TARGET_CHAT_ID}`);
   } catch (err) {
-    console.error('❌ 發送錯誤:', err);
+    console.error('❌ Failed to send meme:', err);
   }
 }
 
-// 錯誤處理
-bot.catch((err, ctx) => {
-  console.error(`Bot Error for ${ctx.updateType}`, err);
-});
+sendMeme(); // 立即執行一次
