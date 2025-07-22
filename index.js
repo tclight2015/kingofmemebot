@@ -10,7 +10,6 @@ bot.start((ctx) => {
   console.log('💡 chat.id:', ctx.chat.id);
   ctx.reply('你好！我是 King of Meme Bot 🤖');
 });
-'));
 
 // 處理 Meme 指令，隨機回傳一張 meme 圖片
 bot.command('Meme', async (ctx) => {
